@@ -33,12 +33,13 @@ done
 
 # Combine private key and full certificate chain for HAproxy.
 cd /etc/letsencrypt/live
-for domain in */ ; do
-	cat "$domain/privkey.pem" "$domain/fullchain.pem" > "/certs/$domain.pem"
-	if [[ "$domain" = "$DEFAULT" ]]; then
-		echo "Saving default certificate ($domain) as '_default.pem'."
-		cp "/certs/$domain.pem" /certs/_default.pem
-	fi
+for domain in `find . ! -path . -type d | sed 's|^\./||'` ; do
+   echo "Merging cert for domain: $domain"
+   cat "$domain/privkey.pem" "$domain/fullchain.pem" > "/certs/$domain.pem"
+   if [[ "$domain" = "$DEFAULT" ]]; then
+     echo "Saving default certificate ($domain) as '_default.pem'."
+     cp "/certs/$domain.pem" /certs/_default.pem
+   fi
 done
 
 # Reload HAproxy.
